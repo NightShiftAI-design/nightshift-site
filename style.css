@@ -1,0 +1,81 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0d0d0d;
+    color: #fff;
+}
+
+header {
+    background: #111;
+    padding: 20px 40px;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo span {
+    color: #5E00FF;
+}
+
+ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.hero {
+    padding: 120px 40px;
+    text-align: center;
+    background: linear-gradient(135deg, #5E00FF, #1f0033);
+}
+
+.hero h2 {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.cta {
+    background: #5E00FF;
+    padding: 14px 28px;
+    color: #fff;
+    display: inline-block;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 20px;
+}
+
+.features, .pricing, .faq, .contact {
+    padding: 80px 40px;
+}
+
+.feature-grid, .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+}
+
+.feature-card, .price-card {
+    background: #111;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.price-card.best {
+    border: 2px solid #5E00FF;
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    background: #111;
+    margin-top: 40px;
+}
