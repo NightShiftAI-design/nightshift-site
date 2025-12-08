@@ -1,14 +1,15 @@
 {
   "name": "nightshift-hotels",
   "version": "1.0.0",
-  "description": "NightShift Hotels website + API for reservation alerts and reservation storage",
+  "description": "NightShift Hotels website + API for reservation alerts + Supabase storage",
   "type": "module",
   "scripts": {
+    "build": "echo \"Building NightShift API…\"",
     "start": "vercel dev"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1",
-    "twilio": "^4.0.0",
-    "@sendgrid/mail": "^7.7.0"
+    "@supabase/supabase-js": "^2.39.7",
+    "@sendgrid/mail": "^7.7.0",
+    "twilio": "^4.23.0"
   }
 }
