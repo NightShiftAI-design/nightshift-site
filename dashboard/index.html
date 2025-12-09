@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NightShift Dashboard</title>
+
+<style>
+    body {
+        background: #0d0d0d;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background: #111;
+        padding: 20px;
+        text-align: center;
+        font-size: 26px;
+        font-weight: bold;
+        border-bottom: 2px solid #5E00FF;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 25px auto;
+        padding: 20px;
+    }
+
+    h2 {
+        margin-top: 40px;
+        margin-bottom: 15px;
+        border-left: 5px solid #5E00FF;
+        padding-left: 10px;
+        font-size: 22px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background: #111;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #333;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    th {
+        background: #1a1a1a;
+        color: #5E00FF;
+        font-weight: bold;
+    }
+
+    tr:hover {
+        background: #1d1d1d;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 40px 0;
+        font-size: 18px;
+        color: #bbb;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<header>NightShift AI — Reservations Dashboard</header>
+
+<div class="container">
+
+    <h2>Reservations</h2>
+    <div id="res-loading" class="loading">Loading reservations...</div>
+    <table id="reservations-table" style="display:none;">
+        <thead>
+            <tr>
+                <th>Guest</th>
+                <th>Arrival</th>
+                <th>Nights</th>
+                <th>Room</th>
+                <th>Guests</th>
+                <th>Pets</th>
+                <th>Total Due</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody id="reservations-body"></tbody>
+    </table>
+
+    <h2>Call Metadata</h2>
+    <div id="meta-loading" class="loading">Loading call activity...</div>
+    <table id="metadata-table" style="display:none;">
+        <thead>
+            <tr>
+                <th>Caller</th>
+                <th>Reason</th>
+                <th>Arrival Date</th>
+                <th>Duration</th>
+                <th>Sentiment</th>
+                <th>Tags</th>
+                <th>Outcome</th>
+            </tr>
+        </thead>
+        <tbody id="metadata-body"></tbody>
+    </table>
+
+</div>
+
+
+<script>
+// =====================================================================================
+// SUPABASE CONFIG
+// =====================================================================================
+const SUPABASE_URL = "https://sbzdnzouoyxmawuhdvdi.supabase.co";
+const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiemRuem91b3l4bWF3dWhkdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMDY3ODgsImV4cCI6MjA4MDc4Mjc4OH0.SV4XppZoez27_g69NsjZNeJ989bhrEAAvR_XoD5w2Ho";
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+// =====================================================================================
+// SAFE: LOAD DATA ONLY AFTER PAGE COMPLETELY LOADS
+// (Prevents Vercel Crawler From Triggering Supabase Calls)
+// =====================================================================================
+document.addEventListener("DOMContentLoaded", () => {
+    loadReservations();
+    loadCallMetadata();
+});
+
+
+// =====================================================================================
+// LOAD RESERVATIONS
+// =====================================================================================
+async function loadReservations() {
+    const { data, error } = await supabase
+        .from("reservations")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    const loadingEl = document.getElementById("res-loading");
+    const tableEl = document.getElementById("reservations-table");
+    const bodyEl = document.getElementById("reservations-body");
+
+    if (error) {
+        console.error("Reservations error:", error);
+        loadingEl.innerText = "Failed to load reservations.";
+        return;
+    }
+
+    loadingEl.style.display = "none";
+    tableEl.style.display = "table";
+    bodyEl.innerHTML = "";
+
+    data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${row.guest_name || "-"}</td>
+            <td>${row.arrival_date || "-"}</td>
+            <td>${row.nights || "-"}</td>
+            <td>${row.room_type || "-"}</td>
+            <td>${row.guests || "-"}</td>
+            <td>${row.pets || "-"}</td>
+            <td>$${row.total_due?.toFixed(2) || "0.00"}</td>
+            <td>${row.notes || "-"}</td>
+        `;
+        bodyEl.appendChild(tr);
+    });
+}
+
+
+// =====================================================================================
+// LOAD CALL METADATA
+// =====================================================================================
+async function loadCallMetadata() {
+    const { data, error } = await supabase
+        .from("call_metadata")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    const loadingEl = document.getElementById("meta-loading");
+    const tableEl = document.getElementById("metadata-table");
+    const bodyEl = document.getElementById("metadata-body");
+
+    if (error) {
+        console.error("Metadata error:", error);
+        loadingEl.innerText = "Failed to load call data.";
+        return;
+    }
+
+    loadingEl.style.display = "none";
+    tableEl.style.display = "table";
+    bodyEl.innerHTML = "";
+
+    data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${row.caller_number || "-"}</td>
+            <td>${row.reason || "-"}</td>
+            <td>${row.arrival_date || "-"}</td>
+            <td>${row.duration_seconds || "-"}</td>
+            <td>${row.sentiment_score ?? "-"}</td>
+            <td>${row.tags || "-"}</td>
+            <td>${row.outcome || "-"}</td>
+        `;
+        bodyEl.appendChild(tr);
+    });
+}
+</script>
+
+</body>
+</html>
