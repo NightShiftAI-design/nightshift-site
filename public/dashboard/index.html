@@ -3,12 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="dark" />
 <title>NightShift Dashboard</title>
 
 <style>
+    :root {
+        color-scheme: dark;
+    }
+
     body {
         background: #0d0d0d;
-        color: #fff;
+        color: #ffffff;
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
@@ -35,6 +40,7 @@
         border-left: 5px solid #5E00FF;
         padding-left: 10px;
         font-size: 22px;
+        color: #ffffff;
     }
 
     table {
@@ -44,6 +50,7 @@
         background: #111;
         border-radius: 12px;
         overflow: hidden;
+        color: #ffffff;
     }
 
     th, td {
@@ -67,10 +74,11 @@
         text-align: center;
         padding: 40px 0;
         font-size: 18px;
-        color: #bbb;
+        color: #bbbbbb;
     }
 </style>
 
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
@@ -80,8 +88,10 @@
 
 <div class="container">
 
+    <!-- Reservations -->
     <h2>Reservations</h2>
     <div id="res-loading" class="loading">Loading reservations...</div>
+
     <table id="reservations-table" style="display:none;">
         <thead>
             <tr>
@@ -98,8 +108,10 @@
         <tbody id="reservations-body"></tbody>
     </table>
 
+    <!-- Call Metadata -->
     <h2>Call Metadata</h2>
     <div id="meta-loading" class="loading">Loading call activity...</div>
+
     <table id="metadata-table" style="display:none;">
         <thead>
             <tr>
@@ -118,27 +130,21 @@
 </div>
 
 <script>
-// -------------------------------------------------------
-// FIXED: Proper Supabase Client
-// -------------------------------------------------------
-const client = supabase.createClient(
-    "https://sbzdnzouoyxmawuhdvdi.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiemRuem91b3l4bWF3dWhkdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMDY3ODgsImV4cCI6MjA4MDc4Mjc4OH0.SV4XppZoez27_g69NsjZNeJ989bhrEAAvR_XoD5w2Ho"
-);
+const SUPABASE_URL = "https://sbzdnzouoyxmawuhdvdi.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiemRuem91b3l4bWF3dWhkdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMDY3ODgsImV4cCI6MjA4MDc4Mjc4OH0.SV4XppZoez27_g69NsjZNeJ989bhrEAAvR_XoD5w2Ho";
 
-// -------------------------------------------------------
-// LOAD Reservations
-// -------------------------------------------------------
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ----------------------- LOAD RESERVATIONS -------------------------
 async function loadReservations() {
-    const { data, error } = await client
+    const { data, error } = await supabase
         .from("reservations")
         .select("*")
         .order("created_at", { ascending: false });
 
     if (error) {
         console.error("Reservations error:", error);
-        document.getElementById("res-loading").innerText =
-            "Failed to load reservations.";
+        document.getElementById("res-loading").innerText = "Failed to load reservations.";
         return;
     }
 
@@ -164,19 +170,16 @@ async function loadReservations() {
     });
 }
 
-// -------------------------------------------------------
-// LOAD Call Metadata
-// -------------------------------------------------------
+// ----------------------- LOAD CALL METADATA ------------------------
 async function loadCallMetadata() {
-    const { data, error } = await client
+    const { data, error } = await supabase
         .from("call_metadata")
         .select("*")
         .order("created_at", { ascending: false });
 
     if (error) {
         console.error("Metadata error:", error);
-        document.getElementById("meta-loading").innerText =
-            "Failed to load call data.";
+        document.getElementById("meta-loading").innerText = "Failed to load call data.";
         return;
     }
 
@@ -201,7 +204,6 @@ async function loadCallMetadata() {
     });
 }
 
-// Run on page load
 loadReservations();
 loadCallMetadata();
 </script>
