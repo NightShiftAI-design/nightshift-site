@@ -1,5 +1,10 @@
-// api/save-call-metadata.js
 import { createClient } from '@supabase/supabase-js';
+
+export const config = {
+  api: {
+    bodyParser: true, // FORCE VERCEL TO PARSE JSON
+  },
+};
 
 export default async function handler(req, res) {
   try {
@@ -7,13 +12,25 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Parse JSON body (Vercel does NOT auto-parse)
-    const body =
-      typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    // Safely parse JSON
+    let body = req.body;
 
-    // Basic validation
-    if (!body || !body.hotel_id) {
-      return res.status(400).json({ error: 'hotel_id is required' });
+    // Handle stringified JSON cases
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        return res.status(400).json({ error: "Invalid JSON body" });
+      }
+    }
+
+    if (!body || typeof body !== "object") {
+      return res.status(400).json({ error: "Missing JSON body" });
+    }
+
+    // Validate hotel_id
+    if (!body.hotel_id) {
+      return res.status(400).json({ error: "hotel_id is required" });
     }
 
     // Connect to Supabase
@@ -22,9 +39,9 @@ export default async function handler(req, res) {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    // Insert call metadata
+    // Insert metadata
     const { data, error } = await supabase
-      .from('call_metadata')
+      .from("call_metadata")
       .insert([
         {
           hotel_id: body.hotel_id,
@@ -43,14 +60,14 @@ export default async function handler(req, res) {
       .select();
 
     if (error) {
-      console.error('Supabase insert error:', error);
-      return res.status(500).json({ error: 'Database insert failed' });
+      console.error("Supabase insert error:", error);
+      return res.status(500).json({ error: "Database insert failed", detail: error });
     }
 
     return res.status(200).json({ success: true, saved: data });
 
   } catch (err) {
-    console.error('Server error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Server error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
