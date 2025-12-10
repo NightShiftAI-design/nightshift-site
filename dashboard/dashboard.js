@@ -1,4 +1,3 @@
-/ Redirect if not logged in
 (function () {
   function getCookie(name) {
     return document.cookie.split("; ").find(r => r.startsWith(name + "="));
@@ -11,39 +10,32 @@
 import { supabase } from './supabase-client.js';
 
 async function loadDashboard() {
-  /* -----------------------------
-     LOAD DAILY CALL SUMMARY
-  ----------------------------- */
+
+  // ---- 1. Daily Call Summary ----
   const { data: calls, error: callsError } = await supabase
-    .from('daily_calls_view')   // FIXED TABLE NAME
-    .select('*')
-    .order('date', { ascending: false })
+    .from("daily_call_summary")
+    .select("*")
+    .order("date", { ascending: false })
     .limit(7);
 
   if (callsError) {
-    document.getElementById("stats-content").innerHTML =
-      "Error loading call data.";
-    console.error("CALL SUMMARY ERROR:", callsError);
+    document.getElementById("stats-content").innerHTML = "Error loading calls.";
   } else {
     document.getElementById("stats-content").innerHTML =
       calls && calls.length
-        ? calls.map(c => `<p>${c.date}: ${c.total_calls} calls</p>`).join("")
-        : "No call data yet.";
+        ? calls.map(c => `<p><strong>${c.date}</strong>: ${c.total_calls} calls</p>`).join("")
+        : "No call data";
   }
 
-  /* -----------------------------
-     LOAD RESERVATIONS
-  ----------------------------- */
+  // ---- 2. Latest Reservations ----
   const { data: reservations, error: resError } = await supabase
-    .from('reservations')    // FIXED TABLE NAME
-    .select('*')
-    .order('created_at', { ascending: false })
+    .from("reservations")
+    .select("*")
+    .order("created_at", { ascending: false })
     .limit(10);
 
   if (resError) {
-    document.getElementById("reservations-list").innerHTML =
-      "Error loading reservations.";
-    console.error("RESERVATIONS ERROR:", resError);
+    document.getElementById("reservations-list").innerHTML = "Error loading reservations.";
   } else {
     document.getElementById("reservations-list").innerHTML =
       reservations && reservations.length
