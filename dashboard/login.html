@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Login</title>
+
+  <link rel="stylesheet" href="/dashboard/style.css">
+
+  <style>
+    body {
+      background:#0a0a0a; color:white;
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-family:Arial, sans-serif;
+    }
+    .box {
+      width:320px;
+      padding:32px;
+      background:#111;
+      border-radius:10px;
+      border:1px solid #222;
+      text-align:center;
+    }
+    input, button {
+      width:100%;
+      padding:12px;
+      margin-top:12px;
+      border-radius:6px;
+      border:none;
+      font-size:16px;
+    }
+    button {
+      background:#4caf50;
+      color:white;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    button:hover { background:#3b8f3e; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>NightShift Dashboard</h2>
+  <input type="password" id="pass" placeholder="Enter Password">
+  <button onclick="login()">Login</button>
+  <p id="err" style="color:red;margin-top:10px;"></p>
+</div>
+
+<script>
+const PASSWORD = "NightShift2025!"; // change this
+
+function login() {
+  const pwd = document.getElementById("pass").value.trim();
+  if (pwd === PASSWORD) {
+    document.cookie = "ns-auth=true; max-age=86400; path=/dashboard;";
+    window.location.href = "/dashboard/index.html";
+  } else {
+    document.getElementById("err").textContent = "Incorrect password.";
+  }
+}
+
+// already logged in?
+if (document.cookie.includes("ns-auth=true")) {
+  window.location.href = "/dashboard/index.html";
+}
+</script>
+
+</body>
+</html>
