@@ -1,81 +1,61 @@
-// Protect dashboard (simple cookie check)
+// Redirect if not logged in
 (function () {
-  if (!document.cookie.includes("ns-auth=")) {
+  function getCookie(name) {
+    return document.cookie.split("; ").find(r => r.startsWith(name + "="));
+  }
+  if (!getCookie("ns-auth")) {
     window.location.href = "/dashboard/login.html";
   }
 })();
 
-// Import supabase client
-import { supabase } from "./supabase-client.js";
+import { supabase } from './supabase-client.js';
 
-// Wait until DOM is fully ready
-document.addEventListener("DOMContentLoaded", () => {
-  loadDashboard();
-  setupLogout();
-});
-
-// Load stats + reservations
 async function loadDashboard() {
-  try {
-    // --- CALL SUMMARY ---
-    const { data: calls, error: callError } = await supabase
-      .from("public_daily_calls_view")
-      .select("*")
-      .order("date", { ascending: false })
-      .limit(7);
+  /* -----------------------------
+     LOAD DAILY CALL SUMMARY
+  ----------------------------- */
+  const { data: calls, error: callsError } = await supabase
+    .from('daily_calls_view')   // FIXED TABLE NAME
+    .select('*')
+    .order('date', { ascending: false })
+    .limit(7);
 
-    if (callError) {
-      console.error("Call summary error:", callError);
-      document.getElementById("stats-content").innerHTML = "Error loading calls.";
-    } else {
-      document.getElementById("stats-content").innerHTML =
-        calls?.length
-          ? calls
-              .map((c) => `<p>${c.date}: ${c.total_calls} calls</p>`)
-              .join("")
-          : "No call data.";
-    }
+  if (callsError) {
+    document.getElementById("stats-content").innerHTML =
+      "Error loading call data.";
+    console.error("CALL SUMMARY ERROR:", callsError);
+  } else {
+    document.getElementById("stats-content").innerHTML =
+      calls && calls.length
+        ? calls.map(c => `<p>${c.date}: ${c.total_calls} calls</p>`).join("")
+        : "No call data yet.";
+  }
 
-    // --- RESERVATIONS ---
-    const { data: reservations, error: resError } = await supabase
-      .from("public_reservations")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(10);
+  /* -----------------------------
+     LOAD RESERVATIONS
+  ----------------------------- */
+  const { data: reservations, error: resError } = await supabase
+    .from('reservations')    // FIXED TABLE NAME
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(10);
 
-    if (resError) {
-      console.error("Reservation error:", resError);
-      document.getElementById("reservations-list").innerHTML =
-        "Error loading reservations.";
-    } else {
-      document.getElementById("reservations-list").innerHTML =
-        reservations?.length
-          ? reservations
-              .map(
-                (r) => `
+  if (resError) {
+    document.getElementById("reservations-list").innerHTML =
+      "Error loading reservations.";
+    console.error("RESERVATIONS ERROR:", resError);
+  } else {
+    document.getElementById("reservations-list").innerHTML =
+      reservations && reservations.length
+        ? reservations.map(r => `
             <div class="reservation-card">
               <strong>${r.guest_name}</strong><br>
               ${r.room_type} — ${r.arrival_date}<br>
               Total: $${r.total_due}
             </div>
-          `
-              )
-              .join("")
-          : "No reservations yet.";
-    }
-  } catch (err) {
-    console.error("Dashboard load error:", err);
+          `).join("")
+        : "No reservations yet.";
   }
 }
 
-// Logout button
-function setupLogout() {
-  const btn = document.getElementById("logout-btn");
-  if (!btn) return;
-
-  btn.onclick = () => {
-    document.cookie =
-      "ns-auth=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;";
-    window.location.href = "/dashboard/login.html";
-  };
-}
+loadDashboard();
