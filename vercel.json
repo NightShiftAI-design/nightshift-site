@@ -3,35 +3,36 @@
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "pricing.html", "use": "@vercel/static" },
-    { "src": "contact.html", "use": "@vercel/static" },
     { "src": "faq.html", "use": "@vercel/static" },
+    { "src": "contact.html", "use": "@vercel/static" },
 
     { "src": "style.css", "use": "@vercel/static" },
+
     { "src": "public/**", "use": "@vercel/static" },
 
-    { "src": "dashboard/**", "use": "@vercel/static" },
+    { "src": "dashboard/*.html", "use": "@vercel/static" },
+    { "src": "dashboard/*.js", "use": "@vercel/static" },
+    { "src": "dashboard/*.css", "use": "@vercel/static" },
 
     { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
 
   "routes": [
     { "src": "/pricing", "dest": "/pricing.html" },
-    { "src": "/contact", "dest": "/contact.html" },
     { "src": "/faq", "dest": "/faq.html" },
+    { "src": "/contact", "dest": "/contact.html" },
 
-    { "src": "/style.css", "dest": "/style.css" },
     { "src": "/public/(.*)", "dest": "/public/$1" },
+    { "src": "/style.css", "dest": "/style.css" },
 
     { "src": "/dashboard/login", "dest": "/dashboard/login.html" },
-    { "src": "/dashboard/login/", "dest": "/dashboard/login.html" },
-
-    { "src": "/dashboard", "dest": "/dashboard/index.html" },
-    { "src": "/dashboard/", "dest": "/dashboard/index.html" },
+    { "src": "/dashboard/index", "dest": "/dashboard/index.html" },
 
     { "src": "/dashboard/(.*)", "dest": "/dashboard/$1" },
 
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
 
+    { "src": "/", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
